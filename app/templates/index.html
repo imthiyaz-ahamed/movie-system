@@ -1,0 +1,95 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Dashboard | CineMatch AI{% endblock %}
+
+{% block content %}
+<section class="hero reveal">
+    <div class="hero-copy-wrap">
+        <p class="eyebrow">AI/ML MOVIE INTELLIGENCE</p>
+        <h1>Discover your next favorite film with smart, personalized recommendations.</h1>
+        <p class="hero-copy">
+            Rate the movies you watch, search by title, filter by genre, and let our scikit-learn recommendation engine adapt to your taste profile in real time.
+        </p>
+        <div class="hero-actions">
+            <a class="button primary" href="{{ url_for('movies') }}">Browse Catalog</a>
+            {% if not current_user %}
+                <a class="button ghost" href="{{ url_for('register') }}">Create Profile</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="hero-panel">
+        <h3>System Highlights</h3>
+        <ul>
+            <li>Secure user login and profile history</li>
+            <li>MongoDB-backed movie and rating data</li>
+            <li>Content-based ML recommendation engine</li>
+            <li>Search by movie name and genre filter</li>
+            <li>Personalized dashboard updates after ratings</li>
+        </ul>
+    </div>
+</section>
+
+{% if current_user %}
+<section class="section-block reveal delay-1">
+    <div class="section-heading">
+        <h2>Recommended For You</h2>
+        <p>Generated from your past ratings and content similarity.</p>
+    </div>
+    <div class="card-grid">
+        {% for movie in recommendations %}
+            <article class="movie-card">
+                <span class="badge">MATCH {{ (movie.score * 100)|round|int }}%</span>
+                <h3>{{ movie.title }}</h3>
+                <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
+                <p>{{ movie.description[:120] }}{% if movie.description|length > 120 %}...{% endif %}</p>
+                <a class="text-link" href="{{ url_for('movie_detail', movie_id=movie._id) }}">Open Movie</a>
+            </article>
+        {% else %}
+            <article class="empty-state">
+                <h3>Recommendation engine is waiting</h3>
+                <p>Rate a few movies and we will start showing personalized suggestions.</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section-block reveal delay-2">
+    <div class="section-heading">
+        <h2>Your Recent Ratings</h2>
+        <p>Your activity here is used as learning history.</p>
+    </div>
+    <div class="card-grid">
+        {% for item in history %}
+            <article class="movie-card">
+                <span class="badge neutral">RATED {{ item.score }}/5</span>
+                <h3>{{ item.movie.title }}</h3>
+                <p class="meta">{{ item.movie.year }} | {{ item.movie.genres | join(", ") }}</p>
+                <a class="text-link" href="{{ url_for('movie_detail', movie_id=item.movie._id) }}">View Movie</a>
+            </article>
+        {% else %}
+            <article class="empty-state">
+                <h3>No rating history found</h3>
+                <p>Open the catalog, rate movies, and your history will appear here.</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="section-block reveal delay-2">
+    <div class="section-heading">
+        <h2>Latest In Catalog</h2>
+        <p>Fresh entries available for testing and recommendation training.</p>
+    </div>
+    <div class="card-grid">
+        {% for movie in recent_movies %}
+            <article class="movie-card">
+                <h3>{{ movie.title }}</h3>
+                <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
+                <p>{{ movie.description[:110] }}{% if movie.description|length > 110 %}...{% endif %}</p>
+                <a class="text-link" href="{{ url_for('movie_detail', movie_id=movie._id) }}">Open Movie</a>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

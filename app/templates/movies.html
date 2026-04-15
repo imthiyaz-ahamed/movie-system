@@ -1,0 +1,43 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Movies | CineMatch AI{% endblock %}
+
+{% block content %}
+<section class="section-block reveal">
+    <div class="section-heading">
+        <p class="eyebrow">DISCOVER MOVIES</p>
+        <h1>Search and filter your movie universe.</h1>
+        <p>Use title search and genre filters to find movies quickly.</p>
+    </div>
+
+    <form class="filter-bar" method="get">
+        <input type="text" name="search" value="{{ search_term }}" placeholder="Search movie title...">
+        <select name="genre">
+            <option value="">All genres</option>
+            {% for genre in genres %}
+                <option value="{{ genre }}" {% if genre == selected_genre %}selected{% endif %}>{{ genre }}</option>
+            {% endfor %}
+        </select>
+        <button class="button primary" type="submit">Search</button>
+        <a class="button ghost" href="{{ url_for('movies') }}">Reset</a>
+    </form>
+
+    <div class="card-grid">
+        {% for movie in movies %}
+            <article class="movie-card">
+                <h3>{{ movie.title }}</h3>
+                <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
+                <p class="meta-strong">Director: {{ movie.director }}</p>
+                <p>{{ movie.description[:130] }}{% if movie.description|length > 130 %}...{% endif %}</p>
+                <p class="rating-line">Average: {{ movie.average_rating or 0 }}/5 ({{ movie.rating_count or 0 }} ratings)</p>
+                <a class="text-link" href="{{ url_for('movie_detail', movie_id=movie._id) }}">View Details</a>
+            </article>
+        {% else %}
+            <article class="empty-state">
+                <h3>No results found</h3>
+                <p>Try a different movie title or choose another genre.</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

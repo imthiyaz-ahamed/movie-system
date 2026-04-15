@@ -1,0 +1,202 @@
+[
+  {
+    "title": "Inception",
+    "year": 2010,
+    "genres": ["Sci-Fi", "Thriller", "Action"],
+    "director": "Christopher Nolan",
+    "cast": ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Elliot Page"],
+    "description": "A skilled thief enters layered dream worlds to plant an idea deep inside a target's subconscious.",
+    "average_rating": 4.8,
+    "rating_count": 12
+  },
+  {
+    "title": "Interstellar",
+    "year": 2014,
+    "genres": ["Sci-Fi", "Drama", "Adventure"],
+    "director": "Christopher Nolan",
+    "cast": ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"],
+    "description": "A team of explorers travels through a wormhole to search for a new home for humanity.",
+    "average_rating": 4.9,
+    "rating_count": 15
+  },
+  {
+    "title": "The Dark Knight",
+    "year": 2008,
+    "genres": ["Action", "Crime", "Drama"],
+    "director": "Christopher Nolan",
+    "cast": ["Christian Bale", "Heath Ledger", "Gary Oldman"],
+    "description": "Batman faces the Joker, a criminal mastermind who pushes Gotham City into chaos.",
+    "average_rating": 4.9,
+    "rating_count": 18
+  },
+  {
+    "title": "The Shawshank Redemption",
+    "year": 1994,
+    "genres": ["Drama"],
+    "director": "Frank Darabont",
+    "cast": ["Tim Robbins", "Morgan Freeman"],
+    "description": "Two imprisoned men build a lasting friendship while hoping for freedom and redemption.",
+    "average_rating": 4.8,
+    "rating_count": 20
+  },
+  {
+    "title": "The Godfather",
+    "year": 1972,
+    "genres": ["Crime", "Drama"],
+    "director": "Francis Ford Coppola",
+    "cast": ["Marlon Brando", "Al Pacino"],
+    "description": "The aging head of a crime family transfers control of his empire to his reluctant son.",
+    "average_rating": 4.8,
+    "rating_count": 16
+  },
+  {
+    "title": "Avengers: Endgame",
+    "year": 2019,
+    "genres": ["Action", "Adventure", "Sci-Fi"],
+    "director": "Anthony Russo",
+    "cast": ["Robert Downey Jr.", "Chris Evans", "Scarlett Johansson"],
+    "description": "The Avengers assemble one final time to undo the devastation caused by Thanos.",
+    "average_rating": 4.6,
+    "rating_count": 17
+  },
+  {
+    "title": "Titanic",
+    "year": 1997,
+    "genres": ["Romance", "Drama"],
+    "director": "James Cameron",
+    "cast": ["Leonardo DiCaprio", "Kate Winslet"],
+    "description": "A love story unfolds aboard the ill-fated RMS Titanic on its maiden voyage.",
+    "average_rating": 4.4,
+    "rating_count": 14
+  },
+  {
+    "title": "La La Land",
+    "year": 2016,
+    "genres": ["Romance", "Drama", "Musical"],
+    "director": "Damien Chazelle",
+    "cast": ["Ryan Gosling", "Emma Stone"],
+    "description": "An aspiring actress and a jazz musician chase dreams while navigating love in Los Angeles.",
+    "average_rating": 4.3,
+    "rating_count": 9
+  },
+  {
+    "title": "Parasite",
+    "year": 2019,
+    "genres": ["Thriller", "Drama"],
+    "director": "Bong Joon-ho",
+    "cast": ["Song Kang-ho", "Lee Sun-kyun", "Cho Yeo-jeong"],
+    "description": "A poor family gradually infiltrates a wealthy household, leading to unexpected consequences.",
+    "average_rating": 4.7,
+    "rating_count": 13
+  },
+  {
+    "title": "Joker",
+    "year": 2019,
+    "genres": ["Crime", "Drama", "Thriller"],
+    "director": "Todd Phillips",
+    "cast": ["Joaquin Phoenix", "Robert De Niro"],
+    "description": "A struggling comedian spirals into madness and becomes a symbol of social unrest.",
+    "average_rating": 4.2,
+    "rating_count": 11
+  },
+  {
+    "title": "3 Idiots",
+    "year": 2009,
+    "genres": ["Comedy", "Drama"],
+    "director": "Rajkumar Hirani",
+    "cast": ["Aamir Khan", "R. Madhavan", "Sharman Joshi"],
+    "description": "Three engineering students challenge the education system while discovering friendship and purpose.",
+    "average_rating": 4.8,
+    "rating_count": 22
+  },
+  {
+    "title": "Dangal",
+    "year": 2016,
+    "genres": ["Drama", "Sports", "Biography"],
+    "director": "Nitesh Tiwari",
+    "cast": ["Aamir Khan", "Fatima Sana Shaikh", "Sanya Malhotra"],
+    "description": "A former wrestler trains his daughters to become world-class champions.",
+    "average_rating": 4.6,
+    "rating_count": 12
+  },
+  {
+    "title": "Zindagi Na Milegi Dobara",
+    "year": 2011,
+    "genres": ["Adventure", "Drama", "Comedy"],
+    "director": "Zoya Akhtar",
+    "cast": ["Hrithik Roshan", "Farhan Akhtar", "Abhay Deol"],
+    "description": "Three friends reconnect on a life-changing road trip across Spain.",
+    "average_rating": 4.5,
+    "rating_count": 10
+  },
+  {
+    "title": "Your Name",
+    "year": 2016,
+    "genres": ["Animation", "Romance", "Fantasy"],
+    "director": "Makoto Shinkai",
+    "cast": ["Ryunosuke Kamiki", "Mone Kamishiraishi"],
+    "description": "Two teenagers mysteriously begin swapping bodies and become deeply connected.",
+    "average_rating": 4.7,
+    "rating_count": 13
+  },
+  {
+    "title": "Spirited Away",
+    "year": 2001,
+    "genres": ["Animation", "Fantasy", "Adventure"],
+    "director": "Hayao Miyazaki",
+    "cast": ["Rumi Hiiragi", "Miyu Irino"],
+    "description": "A young girl enters a magical world and must rescue her parents from a curse.",
+    "average_rating": 4.8,
+    "rating_count": 11
+  },
+  {
+    "title": "The Matrix",
+    "year": 1999,
+    "genres": ["Sci-Fi", "Action"],
+    "director": "The Wachowskis",
+    "cast": ["Keanu Reeves", "Laurence Fishburne", "Carrie-Anne Moss"],
+    "description": "A hacker discovers reality is a simulation and joins a rebellion against intelligent machines.",
+    "average_rating": 4.7,
+    "rating_count": 19
+  },
+  {
+    "title": "The Social Network",
+    "year": 2010,
+    "genres": ["Drama", "Biography"],
+    "director": "David Fincher",
+    "cast": ["Jesse Eisenberg", "Andrew Garfield", "Justin Timberlake"],
+    "description": "The rise of Facebook brings ambition, legal battles, and fractured friendships.",
+    "average_rating": 4.1,
+    "rating_count": 8
+  },
+  {
+    "title": "Forrest Gump",
+    "year": 1994,
+    "genres": ["Drama", "Romance"],
+    "director": "Robert Zemeckis",
+    "cast": ["Tom Hanks", "Robin Wright"],
+    "description": "A kind-hearted man unexpectedly finds himself present at many pivotal moments in history.",
+    "average_rating": 4.7,
+    "rating_count": 16
+  },
+  {
+    "title": "Whiplash",
+    "year": 2014,
+    "genres": ["Drama", "Music"],
+    "director": "Damien Chazelle",
+    "cast": ["Miles Teller", "J.K. Simmons"],
+    "description": "A young drummer endures relentless pressure from an intimidating music instructor.",
+    "average_rating": 4.5,
+    "rating_count": 9
+  },
+  {
+    "title": "Blade Runner 2049",
+    "year": 2017,
+    "genres": ["Sci-Fi", "Drama", "Mystery"],
+    "director": "Denis Villeneuve",
+    "cast": ["Ryan Gosling", "Harrison Ford", "Ana de Armas"],
+    "description": "A replicant hunter uncovers a secret that could transform society forever.",
+    "average_rating": 4.4,
+    "rating_count": 10
+  }
+]

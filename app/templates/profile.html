@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | CineMatch AI{% endblock %}
+
+{% block content %}
+<section class="section-block reveal">
+    <div class="section-heading">
+        <p class="eyebrow">USER PROFILE</p>
+        <h1>Manage your account</h1>
+        <p>Update your display name and profile image.</p>
+    </div>
+
+    <div class="profile-layout">
+        <article class="profile-card">
+            {% if current_user.profile_image %}
+                <img class="profile-avatar" src="{{ url_for('static', filename=current_user.profile_image) }}" alt="Profile picture">
+            {% else %}
+                <div class="profile-avatar-fallback">{{ current_user.username[0]|upper }}</div>
+            {% endif %}
+            <h3>{{ current_user.username }}</h3>
+            <p class="muted">{{ current_user.email }}</p>
+        </article>
+
+        <form method="post" class="auth-card" enctype="multipart/form-data">
+            <label>Username</label>
+            <input type="text" name="username" value="{{ current_user.username }}" required>
+
+            <label>New Profile Picture</label>
+            <input type="file" name="profile_picture" accept=".png,.jpg,.jpeg,.webp,.gif">
+
+            <button class="button primary" type="submit">Save Changes</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

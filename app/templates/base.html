@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Movie Recommendation System{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="backdrop">
+        <span class="light-orb orb-a"></span>
+        <span class="light-orb orb-b"></span>
+        <span class="light-orb orb-c"></span>
+    </div>
+
+    <header class="site-header">
+        <div class="container nav-row">
+            <a class="brand" href="{{ url_for('home') }}">
+                <span class="brand-mark">CM</span>
+                <span>CineMatch AI</span>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('home') }}">Dashboard</a>
+                <a href="{{ url_for('movies') }}">Catalog</a>
+                {% if current_user %}
+                    <a class="user-pill" href="{{ url_for('profile') }}">
+                        {% if current_user.profile_image %}
+                            <img class="avatar-thumb" src="{{ url_for('static', filename=current_user.profile_image) }}" alt="Profile picture">
+                        {% else %}
+                            <span class="avatar-fallback">{{ current_user.username[0]|upper }}</span>
+                        {% endif %}
+                        <span class="welcome">{{ current_user.username }}</span>
+                    </a>
+                    <a class="nav-action" href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-action" href="{{ url_for('register') }}">Join Now</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="container page-shell">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack reveal-fast">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-row">
+            <p>Personalized Movie Recommendation System | AI/ML Final Year Project</p>
+            <p>{{ current_year }}</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,52 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ movie.title }} | CineMatch AI{% endblock %}
+
+{% block content %}
+<section class="detail-layout reveal">
+    <article class="detail-card">
+        <p class="eyebrow">MOVIE DETAILS</p>
+        <h1>{{ movie.title }}</h1>
+        <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
+        <p>{{ movie.description }}</p>
+        <div class="detail-meta">
+            <p><strong>Director:</strong> {{ movie.director }}</p>
+            <p><strong>Cast:</strong> {{ movie.cast | join(", ") }}</p>
+            <p><strong>Average Rating:</strong> {{ movie.average_rating or 0 }}/5</p>
+            <p><strong>Total Ratings:</strong> {{ movie.rating_count or 0 }}</p>
+        </div>
+    </article>
+
+    <aside class="detail-sidebar">
+        <div class="sidebar-card">
+            <h2>Rate This Movie</h2>
+            {% if current_user %}
+                <form method="post" class="rating-form">
+                    <label>Your score</label>
+                    <select name="score">
+                        {% for score in range(1, 6) %}
+                            <option value="{{ score }}" {% if user_rating and user_rating.score == score %}selected{% endif %}>{{ score }}/5</option>
+                        {% endfor %}
+                    </select>
+                    <button class="button primary" type="submit">Save Rating</button>
+                </form>
+                {% if user_rating %}
+                    <p class="muted">Current selection: {{ user_rating.score }}/5</p>
+                {% endif %}
+            {% else %}
+                <p class="muted">Login to rate this movie and improve your recommendations.</p>
+                <a class="button ghost" href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </div>
+
+        <div class="sidebar-card">
+            <h2>Related Picks</h2>
+            {% for item in similar_movies %}
+                <a class="related-link" href="{{ url_for('movie_detail', movie_id=item._id) }}">{{ item.title }}</a>
+            {% else %}
+                <p class="muted">No related movies right now.</p>
+            {% endfor %}
+        </div>
+    </aside>
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ title }} | CineMatch AI{% endblock %}
+
+{% block content %}
+<section class="message-card reveal">
+    <p class="eyebrow">SYSTEM MESSAGE</p>
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+    <a class="button primary" href="{{ url_for('home') }}">Back to Home</a>
+</section>
+{% endblock %}
