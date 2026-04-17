@@ -25,6 +25,7 @@
     <div class="card-grid">
         {% for movie in movies %}
             <article class="movie-card">
+                <img class="movie-poster" src="{{ url_for('movie_poster', movie_id=movie._id) }}" alt="{{ movie.title }} poster">
                 <h3>{{ movie.title }}</h3>
                 <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
                 <p class="meta-strong">Director: {{ movie.director }}</p>

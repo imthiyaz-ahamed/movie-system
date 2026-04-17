@@ -38,6 +38,7 @@
     <div class="card-grid">
         {% for movie in recommendations %}
             <article class="movie-card">
+                <img class="movie-poster" src="{{ url_for('movie_poster', movie_id=movie._id) }}" alt="{{ movie.title }} poster">
                 <span class="badge">MATCH {{ (movie.score * 100)|round|int }}%</span>
                 <h3>{{ movie.title }}</h3>
                 <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
@@ -61,6 +62,7 @@
     <div class="card-grid">
         {% for item in history %}
             <article class="movie-card">
+                <img class="movie-poster" src="{{ url_for('movie_poster', movie_id=item.movie._id) }}" alt="{{ item.movie.title }} poster">
                 <span class="badge neutral">RATED {{ item.score }}/5</span>
                 <h3>{{ item.movie.title }}</h3>
                 <p class="meta">{{ item.movie.year }} | {{ item.movie.genres | join(", ") }}</p>
@@ -84,6 +86,7 @@
     <div class="card-grid">
         {% for movie in recent_movies %}
             <article class="movie-card">
+                <img class="movie-poster" src="{{ url_for('movie_poster', movie_id=movie._id) }}" alt="{{ movie.title }} poster">
                 <h3>{{ movie.title }}</h3>
                 <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
                 <p>{{ movie.description[:110] }}{% if movie.description|length > 110 %}...{% endif %}</p>

@@ -5,15 +5,20 @@
 {% block content %}
 <section class="detail-layout reveal">
     <article class="detail-card">
-        <p class="eyebrow">MOVIE DETAILS</p>
-        <h1>{{ movie.title }}</h1>
-        <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
-        <p>{{ movie.description }}</p>
-        <div class="detail-meta">
-            <p><strong>Director:</strong> {{ movie.director }}</p>
-            <p><strong>Cast:</strong> {{ movie.cast | join(", ") }}</p>
-            <p><strong>Average Rating:</strong> {{ movie.average_rating or 0 }}/5</p>
-            <p><strong>Total Ratings:</strong> {{ movie.rating_count or 0 }}</p>
+        <div class="detail-hero">
+            <img class="detail-poster" src="{{ url_for('movie_poster', movie_id=movie._id) }}" alt="{{ movie.title }} poster">
+            <div class="detail-copy">
+                <p class="eyebrow">MOVIE DETAILS</p>
+                <h1>{{ movie.title }}</h1>
+                <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
+                <p>{{ movie.description }}</p>
+                <div class="detail-meta">
+                    <p><strong>Director:</strong> {{ movie.director }}</p>
+                    <p><strong>Cast:</strong> {{ movie.cast | join(", ") }}</p>
+                    <p><strong>Average Rating:</strong> {{ movie.average_rating or 0 }}/5</p>
+                    <p><strong>Total Ratings:</strong> {{ movie.rating_count or 0 }}</p>
+                </div>
+            </div>
         </div>
     </article>
 

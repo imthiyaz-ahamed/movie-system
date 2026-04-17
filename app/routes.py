@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import hashlib
 import os
 import uuid
 from datetime import datetime
 
-from flask import current_app, flash, g, redirect, render_template, request, session, url_for
+from flask import Response, current_app, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash, generate_password_hash
+from xml.sax.saxutils import escape
 
 from . import get_database, login_required, mongo_id
 from .recommender import generate_recommendations
@@ -207,6 +209,16 @@ def register_routes(app):
             similar_movies=similar_movies,
         )
 
+    @app.route("/movie-poster/<movie_id>.svg")
+    def movie_poster(movie_id: str):
+        db = get_database(app)
+        movie = db.movies.find_one({"_id": mongo_id(movie_id)})
+        if movie is None:
+            return Response(status=404)
+
+        svg = build_movie_poster_svg(movie)
+        return Response(svg, mimetype="image/svg+xml")
+
 
 def update_movie_rating_stats(db, movie_id):
     ratings = list(db.ratings.find({"movie_id": movie_id}))
@@ -254,3 +266,102 @@ def save_profile_picture(file_storage):
     save_path = os.path.join(upload_dir, generated_name)
     file_storage.save(save_path)
     return f"uploads/profiles/{generated_name}"
+
+
+def build_movie_poster_svg(movie: dict) -> str:
+    title = (movie.get("title") or "Movie").strip()
+    year = movie.get("year") or "Unknown"
+    genres = movie.get("genres") or ["Cinema"]
+    genre_text = " / ".join(genres[:3])
+    palette = poster_palette(title)
+    description = (movie.get("description") or "Discover this movie in CineMatch AI.").strip()
+
+    title_lines = split_text(title, 18, 3)
+    overview_lines = split_text(description, 42, 4)
+
+    title_svg = "".join(
+        f'<text x="44" y="{120 + index * 52}" class="title">{escape(line)}</text>'
+        for index, line in enumerate(title_lines)
+    )
+    overview_svg = "".join(
+        f'<text x="44" y="{358 + index * 24}" class="overview">{escape(line)}</text>'
+        for index, line in enumerate(overview_lines)
+    )
+
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900" role="img" aria-label="{escape(title)} poster">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="{palette[0]}"/>
+      <stop offset="55%" stop-color="{palette[1]}"/>
+      <stop offset="100%" stop-color="{palette[2]}"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="82%" cy="12%" r="60%">
+      <stop offset="0%" stop-color="{palette[3]}" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="{palette[3]}" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="900" rx="32" fill="url(#bg)"/>
+  <rect width="600" height="900" rx="32" fill="url(#glow)"/>
+  <circle cx="490" cy="132" r="124" fill="{palette[3]}" fill-opacity="0.18"/>
+  <circle cx="118" cy="760" r="142" fill="#ffffff" fill-opacity="0.05"/>
+  <rect x="32" y="32" width="536" height="836" rx="24" fill="none" stroke="rgba(255,255,255,0.18)"/>
+  <text x="44" y="72" class="eyebrow">{escape(genre_text.upper())}</text>
+  {title_svg}
+  <text x="44" y="286" class="year">{escape(str(year))}</text>
+  <rect x="44" y="316" width="122" height="6" rx="3" fill="{palette[3]}"/>
+  {overview_svg}
+  <text x="44" y="810" class="footer">CINEMATCH AI</text>
+  <text x="44" y="842" class="footerSmall">PERSONALIZED MOVIE DISCOVERY</text>
+  <style>
+    .eyebrow {{ fill: rgba(255,255,255,0.78); font: 700 18px 'Arial'; letter-spacing: 4px; }}
+    .title {{ fill: #ffffff; font: 700 46px 'Arial'; }}
+    .year {{ fill: rgba(255,255,255,0.88); font: 700 26px 'Arial'; }}
+    .overview {{ fill: rgba(255,255,255,0.86); font: 400 22px 'Arial'; }}
+    .footer {{ fill: rgba(255,255,255,0.95); font: 700 22px 'Arial'; letter-spacing: 3px; }}
+    .footerSmall {{ fill: rgba(255,255,255,0.65); font: 400 16px 'Arial'; letter-spacing: 2px; }}
+  </style>
+</svg>"""
+
+
+def poster_palette(seed_text: str) -> tuple[str, str, str, str]:
+    palettes = [
+        ("#0b1f3a", "#21446f", "#4b7dff", "#ffb86c"),
+        ("#2a1639", "#5a2c76", "#8c59ff", "#ffd166"),
+        ("#101d2f", "#1d4d5b", "#2ea3a1", "#ff8f70"),
+        ("#231321", "#5f2747", "#d94f70", "#ffd46b"),
+        ("#112019", "#1e4a39", "#3ccf91", "#9be15d"),
+        ("#1b1536", "#303f9f", "#5f8dff", "#ff7a45"),
+    ]
+    digest = hashlib.md5(seed_text.encode("utf-8")).hexdigest()
+    return palettes[int(digest[:2], 16) % len(palettes)]
+
+
+def split_text(text: str, max_chars: int, max_lines: int) -> list[str]:
+    words = text.split()
+    lines = []
+    current = []
+    current_len = 0
+
+    for word in words:
+        extra = len(word) + (1 if current else 0)
+        if current and current_len + extra > max_chars:
+            lines.append(" ".join(current))
+            current = [word]
+            current_len = len(word)
+            if len(lines) == max_lines - 1:
+                break
+        else:
+            current.append(word)
+            current_len += extra
+
+    if current and len(lines) < max_lines:
+        lines.append(" ".join(current))
+
+    if not lines:
+        lines = [text[:max_chars] or "Movie"]
+
+    remaining_words = words[len(" ".join(lines).split()):]
+    if remaining_words and lines:
+        lines[-1] = f"{lines[-1][: max(0, max_chars - 3)].rstrip()}..."
+
+    return lines
