@@ -4,6 +4,8 @@ import hashlib
 import os
 import uuid
 from datetime import datetime
+from functools import lru_cache
+from math import ceil
 
 from flask import Response, current_app, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.utils import secure_filename
@@ -14,18 +16,30 @@ from . import get_database, login_required, mongo_id
 from .recommender import generate_recommendations
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
+MOVIES_PER_PAGE = 24
 
 
 def register_routes(app):
     @app.route("/")
     def home():
         db = get_database(app)
-        movies = list(db.movies.find().sort("year", -1))
-        recent_movies = movies[:6]
         recommendations = []
         history = []
+        movies = []
+        recent_movies = list(
+            db.movies.find(
+                {},
+                {
+                    "title": 1,
+                    "year": 1,
+                    "genres": 1,
+                    "description": 1,
+                },
+            ).sort("year", -1).limit(6)
+        )
 
         if g.user:
+            movies = list(db.movies.find().sort("year", -1))
             user_ratings = list(db.ratings.find({"user_id": g.user["_id"]}))
             history = build_history(db, user_ratings)
             recommendations = generate_recommendations(movies, user_ratings, limit=6)
@@ -137,6 +151,7 @@ def register_routes(app):
         db = get_database(app)
         search = request.args.get("search", "").strip()
         genre = request.args.get("genre", "").strip()
+        page = parse_page_number(request.args.get("page", "1"))
 
         query = {}
         if search:
@@ -144,7 +159,28 @@ def register_routes(app):
         if genre:
             query["genres"] = genre
 
-        movies_list = list(db.movies.find(query).sort("title", 1))
+        total_movies = db.movies.count_documents(query)
+        total_pages = max(1, ceil(total_movies / MOVIES_PER_PAGE))
+        if page > total_pages:
+            page = total_pages
+
+        movies_list = list(
+            db.movies.find(
+                query,
+                {
+                    "title": 1,
+                    "year": 1,
+                    "genres": 1,
+                    "director": 1,
+                    "description": 1,
+                    "average_rating": 1,
+                    "rating_count": 1,
+                },
+            )
+            .sort("title", 1)
+            .skip((page - 1) * MOVIES_PER_PAGE)
+            .limit(MOVIES_PER_PAGE)
+        )
         genres = sorted(db.movies.distinct("genres"))
         return render_template(
             "movies.html",
@@ -152,6 +188,11 @@ def register_routes(app):
             genres=genres,
             selected_genre=genre,
             search_term=search,
+            page=page,
+            total_pages=total_pages,
+            total_movies=total_movies,
+            has_prev=page > 1,
+            has_next=page < total_pages,
         )
 
     @app.route("/movie/<movie_id>", methods=("GET", "POST"))
@@ -212,12 +253,30 @@ def register_routes(app):
     @app.route("/movie-poster/<movie_id>.svg")
     def movie_poster(movie_id: str):
         db = get_database(app)
-        movie = db.movies.find_one({"_id": mongo_id(movie_id)})
+        movie = db.movies.find_one(
+            {"_id": mongo_id(movie_id)},
+            {
+                "title": 1,
+                "year": 1,
+                "genres": 1,
+                "description": 1,
+            },
+        )
         if movie is None:
             return Response(status=404)
 
-        svg = build_movie_poster_svg(movie)
-        return Response(svg, mimetype="image/svg+xml")
+        svg = cached_movie_poster_svg(
+            movie_id,
+            movie.get("title") or "Movie",
+            str(movie.get("year") or "Unknown"),
+            " / ".join(movie.get("genres") or ["Cinema"]),
+            movie.get("description") or "Discover this movie in CineMatch AI.",
+        )
+        return Response(
+            svg,
+            mimetype="image/svg+xml",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
 
 
 def update_movie_rating_stats(db, movie_id):
@@ -268,16 +327,23 @@ def save_profile_picture(file_storage):
     return f"uploads/profiles/{generated_name}"
 
 
-def build_movie_poster_svg(movie: dict) -> str:
-    title = (movie.get("title") or "Movie").strip()
-    year = movie.get("year") or "Unknown"
-    genres = movie.get("genres") or ["Cinema"]
-    genre_text = " / ".join(genres[:3])
-    palette = poster_palette(title)
-    description = (movie.get("description") or "Discover this movie in CineMatch AI.").strip()
+@lru_cache(maxsize=1024)
+def cached_movie_poster_svg(
+    movie_id: str,
+    title: str,
+    year: str,
+    genre_text: str,
+    description: str,
+) -> str:
+    del movie_id
+    clean_title = title.strip() or "Movie"
+    clean_year = year or "Unknown"
+    clean_genre_text = genre_text or "Cinema"
+    clean_description = description.strip() or "Discover this movie in CineMatch AI."
+    palette = poster_palette(clean_title)
 
-    title_lines = split_text(title, 18, 3)
-    overview_lines = split_text(description, 42, 4)
+    title_lines = split_text(clean_title, 18, 3)
+    overview_lines = split_text(clean_description, 42, 4)
 
     title_svg = "".join(
         f'<text x="44" y="{120 + index * 52}" class="title">{escape(line)}</text>'
@@ -288,7 +354,7 @@ def build_movie_poster_svg(movie: dict) -> str:
         for index, line in enumerate(overview_lines)
     )
 
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900" role="img" aria-label="{escape(title)} poster">
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900" role="img" aria-label="{escape(clean_title)} poster">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="{palette[0]}"/>
@@ -305,9 +371,9 @@ def build_movie_poster_svg(movie: dict) -> str:
   <circle cx="490" cy="132" r="124" fill="{palette[3]}" fill-opacity="0.18"/>
   <circle cx="118" cy="760" r="142" fill="#ffffff" fill-opacity="0.05"/>
   <rect x="32" y="32" width="536" height="836" rx="24" fill="none" stroke="rgba(255,255,255,0.18)"/>
-  <text x="44" y="72" class="eyebrow">{escape(genre_text.upper())}</text>
+  <text x="44" y="72" class="eyebrow">{escape(clean_genre_text.upper())}</text>
   {title_svg}
-  <text x="44" y="286" class="year">{escape(str(year))}</text>
+  <text x="44" y="286" class="year">{escape(clean_year)}</text>
   <rect x="44" y="316" width="122" height="6" rx="3" fill="{palette[3]}"/>
   {overview_svg}
   <text x="44" y="810" class="footer">CINEMATCH AI</text>
@@ -365,3 +431,11 @@ def split_text(text: str, max_chars: int, max_lines: int) -> list[str]:
         lines[-1] = f"{lines[-1][: max(0, max_chars - 3)].rstrip()}..."
 
     return lines
+
+
+def parse_page_number(raw_value: str) -> int:
+    try:
+        value = int(raw_value)
+    except (TypeError, ValueError):
+        return 1
+    return max(1, value)

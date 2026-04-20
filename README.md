@@ -82,6 +82,30 @@ python app.py
 http://127.0.0.1:5000
 ```
 
+## Online Deployment
+
+This project is ready to deploy on Render.
+
+### Render
+
+1. Push the latest code to GitHub.
+2. Create a MongoDB Atlas cluster and get your application connection string.
+3. In Atlas, allow access from `0.0.0.0/0` for testing or add Render's outbound IPs if you want tighter access control.
+4. In Render, choose `New +` -> `Blueprint` and connect this GitHub repository.
+5. Render will detect [render.yaml](C:\Users\acer\OneDrive\Desktop\final-project\render.yaml).
+6. Set the `MONGO_URI` environment variable to your Atlas connection string when prompted.
+7. Deploy the blueprint.
+
+Render configuration:
+
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `gunicorn app:app`
+- Health Check Path: `/`
+
+### MongoDB Atlas
+
+Use the Atlas UI to copy a standard driver connection string and replace the username, password, and database name values before adding it to Render as `MONGO_URI`.
+
 ## MongoDB Collections
 
 - `users`: stores login credentials and profile details

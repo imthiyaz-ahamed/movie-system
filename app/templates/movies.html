@@ -7,7 +7,7 @@
     <div class="section-heading">
         <p class="eyebrow">DISCOVER MOVIES</p>
         <h1>Search and filter your movie universe.</h1>
-        <p>Use title search and genre filters to find movies quickly.</p>
+        <p>Use title search and genre filters to find movies quickly. Showing {{ movies|length }} of {{ total_movies }} movies.</p>
     </div>
 
     <form class="filter-bar" method="get">
@@ -25,7 +25,7 @@
     <div class="card-grid">
         {% for movie in movies %}
             <article class="movie-card">
-                <img class="movie-poster" src="{{ url_for('movie_poster', movie_id=movie._id) }}" alt="{{ movie.title }} poster">
+                <img class="movie-poster" src="{{ url_for('movie_poster', movie_id=movie._id) }}" alt="{{ movie.title }} poster" loading="lazy" decoding="async">
                 <h3>{{ movie.title }}</h3>
                 <p class="meta">{{ movie.year }} | {{ movie.genres | join(", ") }}</p>
                 <p class="meta-strong">Director: {{ movie.director }}</p>
@@ -40,5 +40,23 @@
             </article>
         {% endfor %}
     </div>
+
+    {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if has_prev %}
+                <a class="button ghost" href="{{ url_for('movies', page=page - 1, search=search_term, genre=selected_genre) }}">Previous</a>
+            {% else %}
+                <span class="button ghost is-disabled">Previous</span>
+            {% endif %}
+
+            <span class="pagination-status">Page {{ page }} of {{ total_pages }}</span>
+
+            {% if has_next %}
+                <a class="button ghost" href="{{ url_for('movies', page=page + 1, search=search_term, genre=selected_genre) }}">Next</a>
+            {% else %}
+                <span class="button ghost is-disabled">Next</span>
+            {% endif %}
+        </div>
+    {% endif %}
 </section>
 {% endblock %}

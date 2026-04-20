@@ -6,7 +6,7 @@
 <section class="detail-layout reveal">
     <article class="detail-card">
         <div class="detail-hero">
-            <img class="detail-poster" src="{{ url_for('movie_poster', movie_id=movie._id) }}" alt="{{ movie.title }} poster">
+            <img class="detail-poster" src="{{ url_for('movie_poster', movie_id=movie._id) }}" alt="{{ movie.title }} poster" decoding="async">
             <div class="detail-copy">
                 <p class="eyebrow">MOVIE DETAILS</p>
                 <h1>{{ movie.title }}</h1>

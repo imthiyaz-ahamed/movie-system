@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: movie-system
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()" --bind 0.0.0.0:$PORT
+    autoDeployTrigger: commit
+    healthCheckPath: /
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB_NAME
+        value: movie_recommendation_db
