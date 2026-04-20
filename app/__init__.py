@@ -14,31 +14,20 @@ load_dotenv()
 
 
 def get_database(app: Flask):
-    if "mongo_db" not in g:
-        client = MongoClient(
-            app.config["MONGO_URI"],
-            serverSelectionTimeoutMS=3000,
-        )
-        g.mongo_client = client
-        g.mongo_db = client[app.config["MONGO_DB_NAME"]]
-    return g.mongo_db
+    return app.extensions["mongo_db"]
 
 
 def close_database(_error=None):
-    client = g.pop("mongo_client", None)
-    g.pop("mongo_db", None)
-    if client is not None:
-        client.close()
+    return None
 
 
 def init_indexes(app: Flask):
-    with app.app_context():
-        db = get_database(app)
-        db.users.create_index("email", unique=True)
-        db.users.create_index("username", unique=True)
-        db.movies.create_index("title")
-        db.movies.create_index("genres")
-        db.ratings.create_index([("user_id", 1), ("movie_id", 1)], unique=True)
+    db = get_database(app)
+    db.users.create_index("email", unique=True)
+    db.users.create_index("username", unique=True)
+    db.movies.create_index("title")
+    db.movies.create_index("genres")
+    db.ratings.create_index([("user_id", 1), ("movie_id", 1)], unique=True)
 
 
 def mongo_id(value: str | ObjectId) -> ObjectId:
@@ -69,6 +58,12 @@ def create_app() -> Flask:
         PROFILE_UPLOAD_DIR=upload_dir,
         MAX_CONTENT_LENGTH=4 * 1024 * 1024,
     )
+    mongo_client = MongoClient(
+        app.config["MONGO_URI"],
+        serverSelectionTimeoutMS=3000,
+    )
+    app.extensions["mongo_client"] = mongo_client
+    app.extensions["mongo_db"] = mongo_client[app.config["MONGO_DB_NAME"]]
 
     @app.before_request
     def load_logged_in_user():
@@ -78,10 +73,6 @@ def create_app() -> Flask:
             return
         db = get_database(app)
         g.user = db.users.find_one({"_id": mongo_id(user_id)})
-
-    @app.teardown_appcontext
-    def teardown(_error=None):
-        close_database(_error)
 
     @app.context_processor
     def inject_globals():
