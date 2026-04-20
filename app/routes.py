@@ -29,17 +29,26 @@ def register_routes(app):
         recent_movies = list(
             db.movies.find(
                 {},
-                {
-                    "title": 1,
-                    "year": 1,
-                    "genres": 1,
-                    "description": 1,
-                },
+                movie_card_projection(),
             ).sort("year", -1).limit(6)
         )
 
         if g.user:
-            movies = list(db.movies.find().sort("year", -1))
+            movies = list(
+                db.movies.find(
+                    {},
+                    {
+                        "title": 1,
+                        "year": 1,
+                        "genres": 1,
+                        "description": 1,
+                        "director": 1,
+                        "cast": 1,
+                        "average_rating": 1,
+                        "rating_count": 1,
+                    },
+                ).sort("year", -1)
+            )
             user_ratings = list(db.ratings.find({"user_id": g.user["_id"]}))
             history = build_history(db, user_ratings)
             recommendations = generate_recommendations(movies, user_ratings, limit=6)
@@ -167,15 +176,7 @@ def register_routes(app):
         movies_list = list(
             db.movies.find(
                 query,
-                {
-                    "title": 1,
-                    "year": 1,
-                    "genres": 1,
-                    "director": 1,
-                    "description": 1,
-                    "average_rating": 1,
-                    "rating_count": 1,
-                },
+                movie_card_projection(),
             )
             .sort("title", 1)
             .skip((page - 1) * MOVIES_PER_PAGE)
@@ -250,27 +251,17 @@ def register_routes(app):
             similar_movies=similar_movies,
         )
 
-    @app.route("/movie-poster/<movie_id>.svg")
-    def movie_poster(movie_id: str):
-        db = get_database(app)
-        movie = db.movies.find_one(
-            {"_id": mongo_id(movie_id)},
-            {
-                "title": 1,
-                "year": 1,
-                "genres": 1,
-                "description": 1,
-            },
-        )
-        if movie is None:
-            return Response(status=404)
-
+    @app.route("/movie-poster.svg")
+    def movie_poster():
+        title = request.args.get("title", "Movie")
+        year = request.args.get("year", "Unknown")
+        genre_text = request.args.get("genres", "Cinema")
+        description = request.args.get("description", "Discover this movie in CineMatch AI.")
         svg = cached_movie_poster_svg(
-            movie_id,
-            movie.get("title") or "Movie",
-            str(movie.get("year") or "Unknown"),
-            " / ".join(movie.get("genres") or ["Cinema"]),
-            movie.get("description") or "Discover this movie in CineMatch AI.",
+            title,
+            str(year),
+            genre_text,
+            description,
         )
         return Response(
             svg,
@@ -329,13 +320,11 @@ def save_profile_picture(file_storage):
 
 @lru_cache(maxsize=1024)
 def cached_movie_poster_svg(
-    movie_id: str,
     title: str,
     year: str,
     genre_text: str,
     description: str,
 ) -> str:
-    del movie_id
     clean_title = title.strip() or "Movie"
     clean_year = year or "Unknown"
     clean_genre_text = genre_text or "Cinema"
@@ -439,3 +428,15 @@ def parse_page_number(raw_value: str) -> int:
     except (TypeError, ValueError):
         return 1
     return max(1, value)
+
+
+def movie_card_projection() -> dict:
+    return {
+        "title": 1,
+        "year": 1,
+        "genres": 1,
+        "director": 1,
+        "description": 1,
+        "average_rating": 1,
+        "rating_count": 1,
+    }
